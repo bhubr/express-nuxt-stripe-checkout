@@ -1,32 +1,51 @@
 <template>
-  <div class="container">
-    <div>
-      <Logo />
-      <h1 class="title">nuxt-frontend</h1>
-      <div class="links">
-        <a
-          href="https://nuxtjs.org/"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="button--green"
-        >
-          Documentation
-        </a>
-        <a
-          href="https://github.com/nuxt/nuxt.js"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="button--grey"
-        >
-          GitHub
-        </a>
-      </div>
+  <div>
+    <div v-if="sessionId !== null">
+      <p>{{ sessionId }}</p>
+      <stripe-checkout
+        ref="checkoutRef"
+        :pk="pk"
+        :session-id="sessionId"
+        :success-url="successUrl"
+        :cancel-url="cancelUrl"
+      />
     </div>
+    <button @click="checkout1">Checkout phase 1</button>
   </div>
 </template>
 
 <script>
-export default {}
+export default {
+  data() {
+    this.pk = process.env.STRIPE_PK
+    return {
+      successUrl: 'http://localhost:3000',
+      cancelUrl: 'http://localhost:3000',
+      sessionId: null,
+    }
+  },
+  methods: {
+    checkout2() {
+      return this.$refs.checkoutRef.redirectToCheckout()
+    },
+    checkout1() {
+      const serverUrl = 'http://localhost:4242'
+      fetch(`${serverUrl}/create-checkout-session`, {
+        method: 'POST',
+      })
+        .then((response) => response.json())
+        .then((session) => {
+          this.sessionId = session.id
+          setTimeout(() => {
+            this.$refs.checkoutRef.redirectToCheckout()
+          }, 200)
+        })
+        .catch((error) => {
+          console.error('Error:', error)
+        })
+    },
+  },
+}
 </script>
 
 <style>
