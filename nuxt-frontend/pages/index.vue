@@ -36,6 +36,7 @@ import {
   performCheckout,
   fetchCart,
   addToCart,
+  decFromCart,
 } from '@/helpers/api'
 
 export default {
@@ -75,37 +76,14 @@ export default {
         })
     },
     increment(productId) {
-      // const product = this.products.find((p) => p.id === productId)
-      // const productInCart = this.cartItems.find(
-      //   (item) => item.product.id === productId
-      // )
-      // if (!productInCart) {
-      //   this.cartItems = [...this.cartItems, { product, quantity: 1 }]
-      // } else {
-      //   this.cartItems = this.cartItems.map((item) =>
-      //     item.product.id === productId
-      //       ? { ...item, quantity: item.quantity + 1 }
-      //       : item
-      //   )
-      // }
       addToCart(productId).then((cart) => {
         this.cartItems = cart
       })
     },
     decrement(productId) {
-      const productIdx = this.cartItems.findIndex(
-        (item) => item.product.id === productId
-      )
-      const product = this.cartItems[productIdx]
-      if (product.quantity === 1) {
-        this.cartItems.splice(productIdx, 1)
-      } else {
-        this.cartItems = this.cartItems.map((item) =>
-          item.product.id === productId
-            ? { ...item, quantity: item.quantity - 1 }
-            : item
-        )
-      }
+      decFromCart(productId).then((cart) => {
+        this.cartItems = cart
+      })
     },
   },
 }

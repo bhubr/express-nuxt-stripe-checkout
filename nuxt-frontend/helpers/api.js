@@ -14,4 +14,7 @@ export const performCheckout = () =>
 export const addToCart = (productId) =>
   instance.post('/cart/add', { productId }).then((res) => res.data)
 
+export const decFromCart = (productId) =>
+  instance.put(`/cart/decrement/${productId}`).then((res) => res.data)
+
 export const fetchCart = () => instance.get('/cart').then((res) => res.data)
