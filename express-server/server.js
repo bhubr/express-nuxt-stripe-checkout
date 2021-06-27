@@ -1,21 +1,54 @@
 require('dotenv').config()
-const { stripeSk } = require('./config')
+const { stripeSk, sessionSecret } = require('./config')
 const stripe = require('stripe')(stripeSk)
 const express = require('express')
 const cors = require('cors')
+const session = require('express-session')
 const products = require('./products')
 
 const app = express()
 app.use(express.json())
 app.use(express.static('.'))
-app.use(cors())
+app.use(
+  cors({
+    origin: 'http://localhost:3000',
+    credentials: true,
+  })
+)
+app.use(
+  session({
+    secret: sessionSecret,
+    resave: true,
+    saveUninitialized: true,
+  })
+)
 
 const YOUR_DOMAIN = 'http://localhost:3000'
 
 app.get('/products', (req, res) => res.send(products))
 
+app.post('/cart/add', (req, res) => {
+  const { productId } = req.body
+  const product = products.find((p) => p.id === productId)
+  let cart = req.session.cart || []
+  const productInCart = cart.find((item) => item.product.id === productId)
+  if (!productInCart) {
+    cart = [...cart, { product, quantity: 1 }]
+  } else {
+    cart = cart.map((item) =>
+      item.product.id === productId
+        ? { ...item, quantity: item.quantity + 1 }
+        : item
+    )
+  }
+  req.session.cart = cart
+  res.send(cart)
+})
+
+app.get('/cart', (req, res) => res.send(req.session.cart || []))
+
 app.post('/create-checkout-session', async (req, res) => {
-  const cartItems = req.body.map(({ quantity, product }) => ({
+  const cartItems = req.session.cart.map(({ quantity, product }) => ({
     price_data: {
       currency: 'eur',
       product_data: {

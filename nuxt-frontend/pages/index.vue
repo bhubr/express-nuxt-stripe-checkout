@@ -31,7 +31,12 @@
 </template>
 
 <script>
-const serverUrl = 'http://localhost:4242'
+import {
+  fetchProducts,
+  performCheckout,
+  fetchCart,
+  addToCart,
+} from '@/helpers/api'
 
 export default {
   data() {
@@ -45,25 +50,20 @@ export default {
     }
   },
   mounted() {
-    fetch(`${serverUrl}/products`)
-      .then((response) => response.json())
+    fetchProducts()
       .then((products) => {
         this.products = products
       })
       .catch((error) => {
         console.error('Error:', error)
       })
+    fetchCart().then((cart) => {
+      this.cartItems = cart
+    })
   },
   methods: {
     checkout() {
-      fetch(`${serverUrl}/create-checkout-session`, {
-        method: 'POST',
-        body: JSON.stringify(this.cartItems),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-        .then((response) => response.json())
+      performCheckout()
         .then((session) => {
           this.sessionId = session.id
           setTimeout(() => {
@@ -75,19 +75,22 @@ export default {
         })
     },
     increment(productId) {
-      const product = this.products.find((p) => p.id === productId)
-      const productInCart = this.cartItems.find(
-        (item) => item.product.id === productId
-      )
-      if (!productInCart) {
-        this.cartItems = [...this.cartItems, { product, quantity: 1 }]
-      } else {
-        this.cartItems = this.cartItems.map((item) =>
-          item.product.id === productId
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        )
-      }
+      // const product = this.products.find((p) => p.id === productId)
+      // const productInCart = this.cartItems.find(
+      //   (item) => item.product.id === productId
+      // )
+      // if (!productInCart) {
+      //   this.cartItems = [...this.cartItems, { product, quantity: 1 }]
+      // } else {
+      //   this.cartItems = this.cartItems.map((item) =>
+      //     item.product.id === productId
+      //       ? { ...item, quantity: item.quantity + 1 }
+      //       : item
+      //   )
+      // }
+      addToCart(productId).then((cart) => {
+        this.cartItems = cart
+      })
     },
     decrement(productId) {
       const productIdx = this.cartItems.findIndex(

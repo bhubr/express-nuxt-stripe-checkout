@@ -20,6 +20,7 @@ export default {
   env: {
     SITE_NAME: process.env.SITE_NAME,
     STRIPE_PK: process.env.STRIPE_PK,
+    API_URL: process.env.API_URL,
   },
 
   // Global CSS: https://go.nuxtjs.dev/config-css
