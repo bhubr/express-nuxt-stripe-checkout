@@ -6,15 +6,15 @@ const instance = axios.create({
 })
 
 export const fetchProducts = () =>
-  instance.get('/products').then((res) => res.data)
+  instance.get('/api/products').then((res) => res.data)
 
 export const performCheckout = () =>
-  instance.post('/create-checkout-session').then((res) => res.data)
+  instance.post('/api/orders/stripe-checkout').then((res) => res.data)
 
 export const addToCart = (productId) =>
-  instance.post('/cart/add', { productId }).then((res) => res.data)
+  instance.post('/api/cart/add', { productId }).then((res) => res.data)
 
 export const decFromCart = (productId) =>
-  instance.put(`/cart/decrement/${productId}`).then((res) => res.data)
+  instance.put(`/api/cart/decrement/${productId}`).then((res) => res.data)
 
-export const fetchCart = () => instance.get('/cart').then((res) => res.data)
+export const fetchCart = () => instance.get('/api/cart').then((res) => res.data)

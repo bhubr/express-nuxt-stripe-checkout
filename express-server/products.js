@@ -1,4 +1,7 @@
-module.exports = [
+require('dotenv').config()
+const Product = require('./models/product')
+
+const products = [
   {
     id: 1,
     name: 'John Mayer - Sob Rock',
@@ -24,3 +27,15 @@ module.exports = [
     unit_amount: 1499,
   },
 ]
+
+// const insertPromises = products.map((p) =>
+//   Product.create({
+//     name: p.name,
+//     image_url: p.images[0],
+//     unit_amount: p.unit_amount,
+//     stock: 5,
+//   }),
+// )
+// Promise.all(insertPromises).then(console.log)
+
+module.exports = products

@@ -2,7 +2,7 @@
   <div>
     <div v-for="product in products" :key="product.id">
       <h3>{{ product.name }}</h3>
-      <img class="product-img" :src="product.images[0]" />
+      <img class="product-img" :src="product.image_url" />
       <p>{{ (product.unit_amount / 100).toFixed(2) }}€</p>
       <button type="button" @click="increment(product.id)">Add to cart</button>
     </div>
@@ -20,7 +20,7 @@
       <h3>Cart</h3>
       <div v-for="item in cartItems" :key="item.product.id">
         <span>{{ item.product.name }}</span>
-        <img class="cart-img" :src="item.product.images[0]" />
+        <img class="cart-img" :src="item.product.image_url" />
         <button type="button" @click="decrement(item.product.id)">-</button>
         {{ item.quantity }}
         <button type="button" @click="increment(item.product.id)">+</button>
