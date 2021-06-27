@@ -9,6 +9,13 @@ module.exports = {
     ecmaVersion: 12,
   },
   rules: {
-    'comma-dangle': ['error', 'always'],
+    'comma-dangle': [
+      'error',
+      {
+        arrays: 'always-multiline',
+        objects: 'always-multiline',
+        functions: 'always-multiline',
+      },
+    ],
   },
 }

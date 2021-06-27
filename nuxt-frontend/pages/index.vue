@@ -1,5 +1,10 @@
 <template>
   <div>
+    <div v-for="product in products" :key="product.id">
+      <h3>{{ product.name }}</h3>
+      <img class="product-img" :src="product.images[0]" />
+      <button type="button" @click="increment(product.id)">Add to cart</button>
+    </div>
     <div v-if="sessionId !== null">
       <p>{{ sessionId }}</p>
       <stripe-checkout
@@ -10,28 +15,52 @@
         :cancel-url="cancelUrl"
       />
     </div>
-    <button @click="checkout1">Checkout phase 1</button>
+    <div>
+      <h3>Cart</h3>
+      <div v-for="item in cartItems" :key="item.product.id">
+        <span>{{ item.product.name }}</span>
+        <img class="cart-img" :src="item.product.images[0]" />
+        <button type="button" @click="decrement(item.product.id)">-</button>
+        {{ item.quantity }}
+        <button type="button" @click="increment(item.product.id)">+</button>
+      </div>
+    </div>
+    <button @click="checkout">Checkout</button>
   </div>
 </template>
 
 <script>
+const serverUrl = 'http://localhost:4242'
+
 export default {
   data() {
     this.pk = process.env.STRIPE_PK
     return {
       successUrl: 'http://localhost:3000',
       cancelUrl: 'http://localhost:3000',
+      products: [],
+      cartItems: [],
       sessionId: null,
     }
   },
+  mounted() {
+    fetch(`${serverUrl}/products`)
+      .then((response) => response.json())
+      .then((products) => {
+        this.products = products
+      })
+      .catch((error) => {
+        console.error('Error:', error)
+      })
+  },
   methods: {
-    checkout2() {
-      return this.$refs.checkoutRef.redirectToCheckout()
-    },
-    checkout1() {
-      const serverUrl = 'http://localhost:4242'
+    checkout() {
       fetch(`${serverUrl}/create-checkout-session`, {
         method: 'POST',
+        body: JSON.stringify(this.cartItems),
+        headers: {
+          'Content-Type': 'application/json',
+        },
       })
         .then((response) => response.json())
         .then((session) => {
@@ -43,6 +72,36 @@ export default {
         .catch((error) => {
           console.error('Error:', error)
         })
+    },
+    increment(productId) {
+      const product = this.products.find((p) => p.id === productId)
+      const productInCart = this.cartItems.find(
+        (item) => item.product.id === productId
+      )
+      if (!productInCart) {
+        this.cartItems = [...this.cartItems, { product, quantity: 1 }]
+      } else {
+        this.cartItems = this.cartItems.map((item) =>
+          item.product.id === productId
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        )
+      }
+    },
+    decrement(productId) {
+      const productIdx = this.cartItems.findIndex(
+        (item) => item.product.id === productId
+      )
+      const product = this.cartItems[productIdx]
+      if (product.quantity === 1) {
+        this.cartItems.splice(productIdx, 1)
+      } else {
+        this.cartItems = this.cartItems.map((item) =>
+          item.product.id === productId
+            ? { ...item, quantity: item.quantity - 1 }
+            : item
+        )
+      }
     },
   },
 }
@@ -78,5 +137,13 @@ export default {
 
 .links {
   padding-top: 15px;
+}
+
+.product-img {
+  max-width: 192px;
+}
+
+.cart-img {
+  max-width: 64px;
 }
 </style>
