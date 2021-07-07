@@ -36,13 +36,12 @@ module.exports = {
 
   async update(orderId, payload) {
     const { items, ...rest } = payload
-    console.log('order/payliad', orderId, rest)
     await pool.queryAsync('UPDATE `order` SET ? WHERE id = ?', [rest, orderId])
   },
 
   async create(payload, items) {
     const totalAmount = items.reduce(
-      (sum, { product, quantity }) => sum + quantity * product.unit_amount,
+      (sum, { product, quantity }) => sum + quantity * product.price,
       0,
     )
     const realPayload = {
@@ -58,11 +57,11 @@ module.exports = {
     const relations = items.map(({ product, quantity }) => [
       orderId,
       product.id,
-      product.unit_amount,
+      product.price,
       quantity,
     ])
     await pool.queryAsync(
-      'INSERT INTO `order_product` (order_id, product_id, unit_amount, quantity) VALUES ?',
+      'INSERT INTO `order_product` (order_id, product_id, price, quantity) VALUES ?',
       [relations],
     )
     return this.findOne(orderId)

@@ -10,7 +10,8 @@ app.use(express.json())
 app.use(express.static('.'))
 app.use(
   cors({
-    origin: 'http://localhost:3000',
+    // Nuxt client & Angular client
+    origin: ['http://localhost:3000', 'http://localhost:4200'],
     credentials: true,
   }),
 )

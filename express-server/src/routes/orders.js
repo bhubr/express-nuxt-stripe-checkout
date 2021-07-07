@@ -16,7 +16,7 @@ router.post('/stripe-checkout', async (req, res) => {
         name: product.name,
         images: [product.image_url],
       },
-      unit_amount: product.unit_amount,
+      unit_amount: product.price,
     },
     quantity,
   }))
@@ -41,11 +41,11 @@ router.post('/stripe-checkout', async (req, res) => {
 router.get('/stripe-success', async (req, res) => {
   const { session_id: sessionId } = req.query
   const order = await Order.findOneByStripeCheckoutId(sessionId)
-  if (order.status !== 'new') {
-    return res.status(409).send({
-      error: 'Order already fulfilled/cancelled',
-    })
-  }
+  // if (order.status !== 'new') {
+  //   return res.status(409).send({
+  //     error: 'Order already fulfilled/cancelled',
+  //   })
+  // }
   const session = await stripe.checkout.sessions.retrieve(sessionId)
   const {
     payment_status: paymentStatus,
@@ -66,7 +66,7 @@ router.get('/stripe-success', async (req, res) => {
     Product.decreaseStock(item.product_id, item.quantity),
   )
   await Promise.all(updateStockPromises)
-  res.sendStatus(204)
+  res.redirect('http://localhost:3000')
 })
 
 module.exports = router
